@@ -80,6 +80,16 @@ def download():
 
 @app.route("/logout")
 def logout():
+    # Delete uploaded file
+    uploaded = "data/attendance.xlsx"
+    if os.path.exists(uploaded):
+        os.remove(uploaded)
+
+    # Delete processed file
+    processed = "data/processed.xlsx"
+    if os.path.exists(processed):
+        os.remove(processed)
+
     session.clear()
     return redirect("/")
 
