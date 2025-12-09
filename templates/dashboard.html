@@ -11,8 +11,12 @@
 
 <a href="/upload" class="btn btn-success mt-3">Upload Excel</a>
 <a href="/actual" class="btn btn-info mt-3">View Actual Log</a>
-<a href="/customised" class="btn btn-warning mt-3">View Customised Log</a>
-<a href="/download" class="btn btn-secondary mt-3">Download Processed Excel</a>
+
+{% if role == 'admin' %}
+    <a href="/customised" class="btn btn-warning mt-3">View Customised Log</a>
+    <a href="/download" class="btn btn-secondary mt-3">Download Processed Excel</a>
+{% endif %}
+
 <a href="/logout" class="btn btn-danger mt-3">Logout</a>
 
 </body>
