@@ -71,9 +71,9 @@ def process_excel(path):
 
     df['Out_Time_Modified'] = df['Shift_Out_DateTime']
 
-    # If Shift_In is earlier than Shift_Start → replace with Shift_Start
+    # If Shift_Out is later than Shift_End → replace with Shift_End
     df['Out_Time_Modified'] = df['Out_Time_Modified'].where(
-        df['Shift_Out_DateTime'] > df['Shift_End_DateTime'],
+        df['Shift_Out_DateTime'] < df['Shift_End_DateTime'],
         df['Shift_End_DateTime']
     )
 
