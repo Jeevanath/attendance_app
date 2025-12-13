@@ -57,7 +57,7 @@ def process_excel(path):
 
     # If Shift_In is earlier than Shift_Start → replace with Shift_Start
     df['In_Time_Modified'] = df['In_Time_Modified'].where(
-        df['Shift_In_DateTime'] > df['Shift_Start_DateTime'],
+        df['Shift_In_DateTime'] > df['Shift_Start_DateTime']- pd.Timedelta(minutes=15),
         df['Shift_Start_DateTime']
     )
 
@@ -71,9 +71,9 @@ def process_excel(path):
 
     df['Out_Time_Modified'] = df['Shift_Out_DateTime']
 
-    # If Shift_Out is later than Shift_End → replace with Shift_End
+    # If Shift_In is earlier than Shift_Start → replace with Shift_Start
     df['Out_Time_Modified'] = df['Out_Time_Modified'].where(
-        df['Shift_Out_DateTime'] < df['Shift_End_DateTime'],
+        df['Shift_Out_DateTime'] < df['Shift_End_DateTime']+ pd.Timedelta(minutes=15),
         df['Shift_End_DateTime']
     )
 
