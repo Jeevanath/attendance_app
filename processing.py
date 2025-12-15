@@ -53,19 +53,42 @@ def process_excel(path):
     )
 
 
-    df['In_Time_Modified'] = df['Shift_In_DateTime']
+  #  df['In_Time_Modified'] = df['Shift_In_DateTime']
 
     # If Shift_In is earlier than Shift_Start → replace with Shift_Start
-    df['In_Time_Modified'] = df['In_Time_Modified'].where(
-        df['Shift_In_DateTime'] > df['Shift_Start_DateTime']- pd.Timedelta(minutes=15),
-        df['Shift_Start_DateTime']
-    )
+  #  df['In_Time_Modified'] = df['In_Time_Modified'].where(
+       # df['Shift_In_DateTime'] > df['Shift_Start_DateTime']- pd.Timedelta(minutes=15),
+     #   df['Shift_Start_DateTime']
+   # )
+
+    mask = df['Shift_In_DateTime'] < (df['Shift_Start_DateTime'] - pd.Timedelta(minutes=15))
+
+    minute_offsets = np.random.randint(-15, 16, size=len(df))
+    random_deltas = pd.to_timedelta(minute_offsets, unit='m')
+    random_times_all = df['Shift_Start_DateTime'] + random_deltas
+
+    df['In_Time_Modified'] = df['Shift_In_DateTime'].where(~mask, random_times_all)
+
+
+
 
     # If Shift_In is NaN → force NaN
     df['In_Time_Modified'] = df['In_Time_Modified'].where(
         df['Shift_In_DateTime'].notna(),
         pd.NaT
     )
+
+
+    
+
+
+
+
+
+
+
+
+    
 
 
 
