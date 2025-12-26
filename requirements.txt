@@ -3,5 +3,8 @@ pandas
 openpyxl
 gunicorn
 xlrd==2.0.1
+<<<<<<< HEAD
 calendar
 os
+=======
+>>>>>>> 627dbccd9164190ee095cb33cfcdd1a218e67d04

@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+<<<<<<< HEAD
 from dataclasses import dataclass, field
 from typing import List, Optional
 
@@ -28,6 +29,11 @@ def hours_to_hhmm(hours):
     mm = total_minutes % 60
 
     return f"{hh:02d}:{mm:02d}"
+=======
+
+
+
+>>>>>>> 627dbccd9164190ee095cb33cfcdd1a218e67d04
 
 
 
@@ -143,6 +149,7 @@ def process_excel(path):
 
 
 
+<<<<<<< HEAD
     # Handle overnight shifts (Out < In → add 1 day)
     overnight_mask = df['Out_Time_Modified'] < df['In_Time_Modified']
     df.loc[overnight_mask, 'Out_Time_Modified'] += pd.Timedelta(days=1)
@@ -158,6 +165,8 @@ def process_excel(path):
     )
     df['Hours_Calculated'] = df['Hours_Calculated'].round(2)
 
+=======
+>>>>>>> 627dbccd9164190ee095cb33cfcdd1a218e67d04
 
   
 
@@ -166,6 +175,7 @@ def process_excel(path):
     df['In_Time_Modified'] = df['In_Time_Modified'].dt.strftime('%H:%M')
     df['Out_Time_Modified'] = df['Out_Time_Modified'].dt.strftime('%H:%M')
 
+<<<<<<< HEAD
     df['Hours_Worked_Modified'] = df['Hours_Calculated'].apply(hours_to_hhmm)
 
 
@@ -203,3 +213,9 @@ def generate_emp_rtf_from_df(df):
 
 
 
+=======
+    df_modified = df[["Paycode", "Name", "Date", "Shift Start Time", "Shift End Time", "In Time", "Out Time", "Hours Worked", "Status", "In_Time_Modified", "Out_Time_Modified"]]
+
+    return df_modified
+
+>>>>>>> 627dbccd9164190ee095cb33cfcdd1a218e67d04

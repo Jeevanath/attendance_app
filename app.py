@@ -2,10 +2,14 @@ from flask import Flask, render_template, request, redirect, session, send_file
 import pandas as pd
 import os
 from werkzeug.utils import secure_filename
+<<<<<<< HEAD
 from string import Template
 from processing import process_excel, generate_emp_rtf_from_df   # keep your existing logic
 from rtf_process import generate_rtf
 
+=======
+from processing import process_excel   # keep your existing logic
+>>>>>>> 627dbccd9164190ee095cb33cfcdd1a218e67d04
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -17,12 +21,18 @@ USERS = {
 }
 
 UPLOAD_FOLDER = "data"
+<<<<<<< HEAD
 REPORT_FOLDER = "reports"
 ALLOWED_EXTENSIONS = {"xls", "xlsx"}
 ATTENDANCE_FILE = os.path.join(UPLOAD_FOLDER, "attendance.xlsx")
 PROCESSED_FILE = os.path.join(UPLOAD_FOLDER, "processed.xlsx")
 REPORT_TEMPLATE = os.path.join(REPORT_FOLDER, "report_template/template.rtf")
 REPORT_FILE = os.path.join(REPORT_FOLDER, "output.rtf")
+=======
+ALLOWED_EXTENSIONS = {"xls", "xlsx"}
+ATTENDANCE_FILE = os.path.join(UPLOAD_FOLDER, "attendance.xlsx")
+PROCESSED_FILE = os.path.join(UPLOAD_FOLDER, "processed.xlsx")
+>>>>>>> 627dbccd9164190ee095cb33cfcdd1a218e67d04
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -30,6 +40,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
+<<<<<<< HEAD
 
 def load_processed_employees():
     if not os.path.exists(PROCESSED_FILE):
@@ -42,6 +53,8 @@ def load_processed_employees():
     return generate_emp_rtf_from_df(p_df)
 
 
+=======
+>>>>>>> 627dbccd9164190ee095cb33cfcdd1a218e67d04
 # ---------------- ROUTES ----------------
 @app.route("/", methods=["GET", "POST"])
 def login():
@@ -124,7 +137,10 @@ def customised():
         return "Attendance file not found", 404
 
     df = process_excel(ATTENDANCE_FILE)
+<<<<<<< HEAD
     processed_dfs["current"] = df
+=======
+>>>>>>> 627dbccd9164190ee095cb33cfcdd1a218e67d04
     df.to_excel(PROCESSED_FILE, index=False, engine="openpyxl")
 
     return render_template(
@@ -144,6 +160,7 @@ def download():
     return send_file(PROCESSED_FILE, as_attachment=True)
 
 
+<<<<<<< HEAD
 
 @app.route("/download-report")
 def download_report():
@@ -239,6 +256,8 @@ def download_report_employee():
 
 
 
+=======
+>>>>>>> 627dbccd9164190ee095cb33cfcdd1a218e67d04
 @app.route("/logout")
 def logout():
     # Cleanup files
