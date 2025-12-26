@@ -129,7 +129,7 @@ def customised():
         return "Attendance file not found", 404
 
     df = process_excel(ATTENDANCE_FILE)
-    processed_dfs["current"] = df
+    #processed_dfs["current"] = df
 
     df.to_excel(PROCESSED_FILE, index=False, engine="openpyxl")
 
