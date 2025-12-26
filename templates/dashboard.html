@@ -9,20 +9,21 @@
 
 <h2>Welcome {{ role|capitalize }}</h2>
 
+<!-- Common buttons -->
 <a href="/upload" class="btn btn-success mt-3">Upload Excel</a>
 <a href="/actual" class="btn btn-info mt-3">View Actual Log</a>
 
 {% if role == 'admin' %}
-<<<<<<< HEAD
 
+    <!-- Admin-only buttons -->
     <a href="/customised" class="btn btn-warning mt-3">View Customised Log</a>
     <a href="/download" class="btn btn-secondary mt-3">Download Processed Excel</a>
 
-    <!-- Download ALL employees report -->
+    <!-- Download ALL employees report (disabled) -->
     <a href="#" class="btn btn-primary mt-3 disabled">
-    Download Full Report
-    <span class="badge bg-warning text-dark ms-2">Not enabled</span>
-</a>
+        Download Full Report
+        <span class="badge bg-warning text-dark ms-2">Not enabled</span>
+    </a>
 
     <!-- Download SINGLE employee report -->
     <form action="/download-report/employee" method="get" class="mt-3 row g-2 align-items-center">
@@ -40,17 +41,10 @@
         </div>
     </form>
 
-=======
-    <a href="/customised" class="btn btn-warning mt-3">View Customised Log</a>
-    <a href="/download" class="btn btn-secondary mt-3">Download Processed Excel</a>
->>>>>>> 627dbccd9164190ee095cb33cfcdd1a218e67d04
 {% endif %}
 
+<!-- Logout button (common for all roles) -->
 <a href="/logout" class="btn btn-danger mt-3">Logout</a>
 
 </body>
-<<<<<<< HEAD
 </html>
-=======
-</html>
->>>>>>> 627dbccd9164190ee095cb33cfcdd1a218e67d04
