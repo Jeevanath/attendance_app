@@ -1,10 +1,14 @@
-from flask import Flask, render_template, request, redirect, session, send_file
+from flask import Flask, render_template, request, redirect, session, send_file, after_this_request
 import pandas as pd
-import os
+import os, pypandoc
 from werkzeug.utils import secure_filename
 from string import Template
 from processing import process_excel, generate_emp_rtf_from_df   # keep your existing logic
 from rtf_process import generate_rtf
+from io import BytesIO
+
+
+
 
 from processing import process_excel   # keep your existing logic
 
@@ -39,7 +43,7 @@ def allowed_file(filename):
 def load_processed_employees():
     if not os.path.exists(PROCESSED_FILE):
         return None
-
+    p_df = pd.DataFrame()    #Creates Empty df
     p_df = pd.read_excel(PROCESSED_FILE)
     if p_df is None:
         return None
@@ -179,11 +183,6 @@ def download_report():
 
 
 
-
-
-
-
-
 @app.route("/download-report/all")
 def download_report_all():
     if "user" not in session:
@@ -209,6 +208,55 @@ def download_report_all():
 
 
 
+#========================================================================================================
+
+"""@app.route("/download-report/employee")
+def download_report_employee():
+    if "user" not in session:
+        return redirect("/")
+
+    paycode = request.args.get("paycode")
+    if not paycode:
+        return "Paycode is required", 400
+
+    EMPLOYEES = load_processed_employees()
+    print("EMPLOYEES size:", len(EMPLOYEES))
+
+    if EMPLOYEES is None:
+        return "Attendance file not found", 404
+
+    if paycode not in EMPLOYEES:
+        return f"Employee {paycode} not found", 404
+
+    with open(REPORT_TEMPLATE, "r", encoding="utf-8") as f:
+        tpl = Template(f.read())
+
+    filled_rtf = generate_rtf(EMPLOYEES[paycode], tpl)
+
+    output_file = f"reports/TimeCard_{paycode}.rtf"
+
+    with open(output_file, "w", encoding="utf-8") as f:
+        f.write(filled_rtf)
+
+    @after_this_request
+    def remove_file(response):
+        try:
+            os.remove(output_file)
+        except Exception as e:
+            app.logger.error(f"Error deleting file {output_file}: {e}")
+        return response
+
+    return send_file(output_file, as_attachment=True) """
+
+
+
+
+
+
+
+
+
+#===================================DOWNLOAD AS BYTES====================================================
 @app.route("/download-report/employee")
 def download_report_employee():
     if "user" not in session:
@@ -230,20 +278,63 @@ def download_report_employee():
 
     filled_rtf = generate_rtf(EMPLOYEES[paycode], tpl)
 
-    output_file = f"reports/TimeCard_{paycode}.rtf"
-    with open(output_file, "w", encoding="utf-8") as f:
-        f.write(filled_rtf)
+    buffer = BytesIO()
+    buffer.write(filled_rtf.encode("utf-8"))
+    buffer.seek(0)
 
-    return send_file(output_file, as_attachment=True)
-
-
-
-
-
-
-
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name=f"TimeCard_{paycode}.rtf",
+        mimetype="application/rtf"
+    )
 
 
+#================================DOWNLOAD AS DOCX=========================================
+
+
+"""@app.route("/download-report/employee")
+def download_report_employee():
+    if "user" not in session:
+        return redirect("/")
+
+    paycode = request.args.get("paycode")
+    if not paycode:
+        return "Paycode is required", 400
+
+    EMPLOYEES = load_processed_employees()
+    if EMPLOYEES is None:
+        return "Attendance file not found", 404
+
+    if paycode not in EMPLOYEES:
+        return f"Employee {paycode} not found", 404
+
+    # Load RTF template
+    with open(REPORT_TEMPLATE, "r", encoding="utf-8") as f:
+        tpl = Template(f.read())
+
+    # Generate RTF content
+    filled_rtf = generate_rtf(EMPLOYEES[paycode], tpl)
+
+    # Convert RTF → DOCX (Pandoc)
+    docx_bytes = pypandoc.convert_text(
+        filled_rtf,
+        to="docx",
+        format="rtf"
+    )
+
+    buffer = BytesIO(docx_bytes)
+    buffer.seek(0)
+
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name=f"TimeCard_{paycode}.docx",
+        mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    ) """
+
+
+#===============================================================================================================
 
 @app.route("/logout")
 def logout():

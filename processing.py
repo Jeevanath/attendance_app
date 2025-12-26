@@ -4,7 +4,6 @@ from dataclasses import dataclass, field
 from typing import List, Optional
 
 
-employees = {}
 
 
 @dataclass
@@ -180,6 +179,7 @@ def process_excel(path):
 
 
 def generate_emp_rtf_from_df(df):
+    employees = {}
 
     print(df)
     for _, row in df.iterrows():
@@ -204,7 +204,5 @@ def generate_emp_rtf_from_df(df):
     return employees
 
 
-    df_modified = df[["Paycode", "Name", "Date", "Shift Start Time", "Shift End Time", "In Time", "Out Time", "Hours Worked", "Status", "In_Time_Modified", "Out_Time_Modified"]]
 
-    return df_modified
 

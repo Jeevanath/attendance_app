@@ -3,5 +3,5 @@ pandas
 openpyxl
 gunicorn
 xlrd==2.0.1
-
+pypandac
 
