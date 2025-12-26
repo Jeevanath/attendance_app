@@ -1,0 +1,256 @@
+
+import calendar
+from datetime import datetime
+
+
+
+def generate_shift_list(date_str, default_shift="G"):
+    """
+    date_str format: DD/MM/YYYY
+    returns list like ['G', '', 'G', 'G', ...]
+    Sundays -> ''
+    """
+    dt = datetime.strptime(date_str, "%d/%m/%Y")
+    year, month = dt.year, dt.month
+
+    days_in_month = calendar.monthrange(year, month)[1]
+
+    shifts = []
+
+    for day in range(1, days_in_month + 1):
+        current_date = datetime(year, month, day)
+
+        if current_date.weekday() == 6:  # Sunday
+            shifts.append("'")
+        else:
+            shifts.append(default_shift)
+
+    return shifts
+
+
+
+
+
+def build_day_header(start_x=1560, y=2471, step=480, days=31):
+    """
+    Generates the day-number row (01–31) exactly like Crystal Reports
+    """
+    block = ""
+
+    for day in range(1,days+1):
+        day_str = f"{day:02d}"
+
+        block += rf"""
+{{\pard\pvpg\phpg\posx{start_x}\posy{y}\absw360\absh-221\fi0\qr
+{{\f0\b0\i0\ul0\strike0\fs13\cf1 {day_str}}}\par}}
+"""
+        start_x += step
+
+    return block
+
+
+
+def build_day_header2(date_str, start_x=1560, y=2471, step=480):
+    """
+    Generates the day-number row (01–28/29/30/31)
+    date_str format: DD/MM/YYYY
+    """
+    dt = datetime.strptime(date_str, "%d/%m/%Y")
+    days = calendar.monthrange(dt.year, dt.month)[1]
+
+    block = ""
+
+    for day in range(1, days + 1):
+        day_str = f"{day:02d}"
+
+        block += rf"""
+{{\pard\pvpg\phpg\posx{start_x}\posy{y}\absw360\absh-221\fi0\qr
+{{\f0\b0\i0\ul0\strike0\fs13\cf1 {day_str}}}\par}}
+"""
+        start_x += step
+
+    return block
+
+
+
+def month_year_from_date(date_str: str) -> str:
+    """
+    date_str format: DD/MM/YYYY
+    returns: 'MONTH YYYY'
+    """
+    dt = datetime.strptime(date_str, "%d/%m/%Y")
+    return dt.strftime("%B %Y").upper()
+
+
+
+
+def build_shift_header(
+    shifts,
+    start_x=1560,
+    y=2902,
+    step=480
+):
+    """
+    Builds the Shift row (G / - / A / B etc.)
+    aligned exactly under the day header
+    """
+    block = ""
+
+    for shift in shifts:
+        block += rf"""
+{{\pard\pvpg\phpg\posx{start_x}\posy{y}\absw360\absh-221\qr\vertalt
+{{\f0\b0\i0\ul0\strike0\fs13\cf1 {shift}}}\par}}
+"""
+        start_x += step
+
+    return block
+
+
+
+
+def build_shift_in_header(
+    shifts,
+    start_x=1560,
+    y=3228,
+    step=480
+):
+    """
+    Builds the Shift row (G / - / A / B etc.)
+    aligned exactly under the day header
+    """
+    block = ""
+
+    for shift in shifts:
+        block += rf"""
+{{\pard\pvpg\phpg\posx{start_x}\posy{y}\absw360\absh-221\qr\vertalt
+{{\f0\b0\i0\ul0\strike0\fs13\cf1 {shift}}}\par}}
+"""
+        start_x += step
+
+    return block
+
+
+def build_shift_out_header(
+    shifts,
+    start_x=1560,
+    y=3554,
+    step=480
+):
+    """
+    Builds the Shift row (G / - / A / B etc.)
+    aligned exactly under the day header
+    """
+    block = ""
+
+    for shift in shifts:
+        block += rf"""
+{{\pard\pvpg\phpg\posx{start_x}\posy{y}\absw360\absh-221\qr\vertalt
+{{\f0\b0\i0\ul0\strike0\fs13\cf1 {shift}}}\par}}
+"""
+        start_x += step
+
+    return block
+
+
+
+def build_atd_header(
+    shifts,
+    start_x=1560,
+    y=3880,
+    step=480
+):
+    """
+    Builds the Shift row (G / - / A / B etc.)
+    aligned exactly under the day header
+    """
+    block = ""
+
+    for shift in shifts:
+        block += rf"""
+{{\pard\pvpg\phpg\posx{start_x}\posy{y}\absw360\absh-221\qr\vertalt
+{{\f0\b0\i0\ul0\strike0\fs13\cf1 {shift}}}\par}}
+"""
+        start_x += step
+
+    return block
+
+
+
+def build_hrs_worked_header(
+    shifts,
+    start_x=1560,
+    y=4206,
+    step=480
+):
+    """
+    Builds the Shift row (G / - / A / B etc.)
+    aligned exactly under the day header
+    """
+    block = ""
+
+    for shift in shifts:
+        block += rf"""
+{{\pard\pvpg\phpg\posx{start_x}\posy{y}\absw360\absh-221\qr\vertalt
+{{\f0\b0\i0\ul0\strike0\fs13\cf1 {shift}}}\par}}
+"""
+        start_x += step
+
+    return block
+
+
+
+
+
+
+def generate_rtf(emprtf, tpl):
+    #with open(REPORT_TEMPLATE, "r", encoding="utf-8") as f:
+    #   tpl = Template(f.read())
+
+
+
+    emprtf.in_times = ["'" if x != x else x for x in emprtf.in_times]
+    emprtf.out_times = ["'" if x != x else x for x in emprtf.out_times]
+    emprtf.hours_worked = ["'" if x != x else x for x in emprtf.hours_worked]
+    emprtf.status = ['-' if x == "WO" else x for x in emprtf.status]
+    emprtf.status = ['X' if x == "P" else x for x in emprtf.status]
+
+    shifts = generate_shift_list(emprtf.date)
+    shifts_in = emprtf.in_times
+    shifts_out = emprtf.out_times
+    atd = emprtf.status
+    hrs_worked = emprtf.hours_worked
+
+
+
+
+
+    day_header = build_day_header2(date_str = emprtf.date)
+    shift_header = build_shift_header(shifts)
+    shift_in_header = build_shift_in_header(shifts_in)
+    shift_out_header = build_shift_out_header(shifts_out)
+    atd_header = build_atd_header(atd)
+    hrs_worked_header = build_hrs_worked_header(hrs_worked)
+
+
+
+    filled_rtf = tpl.substitute(
+        DAY_HEADER=day_header,
+        SHIFT_HEADER=shift_header,
+        SHIFT_IN_HEADER=shift_in_header,
+        SHIFT_OUT_HEADER=shift_out_header,
+        HRS_WORKED_HEADER=hrs_worked_header,
+        ATD_HEADER=atd_header,
+        EMPCODE=emprtf.paycode,
+        NAME=emprtf.name,
+        MONTH_YEAR=month_year_from_date(emprtf.date),
+        P="1",
+        TOT_P="1",
+        DEPARTMENT="ABC",
+        TDP=str(emprtf.status.count("X")),
+        TA=str(emprtf.status.count("A")),
+        TDW=str(emprtf.status.count("X")),
+        THW="TBD"
+    )
+
+    return filled_rtf
+

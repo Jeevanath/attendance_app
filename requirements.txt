@@ -1,0 +1,7 @@
+Flask
+pandas
+openpyxl
+gunicorn
+xlrd==2.0.1
+calendar
+os
