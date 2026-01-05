@@ -240,12 +240,12 @@ def build_extra_hrs_worked_header(
 
 
 
-def generate_rtf(emprtf, tpl, page_num, total_pages):
+def generate_rtf(emprtf, tpl, page_num =1, total_pages=1):
     #with open(REPORT_TEMPLATE, "r", encoding="utf-8") as f:
     #   tpl = Template(f.read())
 
-
-    tpl = Template(tpl)
+    if total_pages != 1:
+        tpl = Template(tpl)
     #print("TOtal hours list",emprtf.hours_calc )
     THW = np.nansum(emprtf.hours_calc)     #Calculation for TOtal hours worked in hh:mm
     THW = hours_to_hhmm(THW)
