@@ -240,7 +240,7 @@ def build_extra_hrs_worked_header(
 
 
 
-def generate_rtf(emprtf, tpl):
+def generate_rtf(emprtf, tpl, page_num, total_pages):
     #with open(REPORT_TEMPLATE, "r", encoding="utf-8") as f:
     #   tpl = Template(f.read())
 
@@ -289,8 +289,8 @@ def generate_rtf(emprtf, tpl):
         EMPCODE=emprtf.paycode,
         NAME=emprtf.name,
         MONTH_YEAR=month_year_from_date(emprtf.date),
-        P="1",
-        TOT_P="1",
+        P=page_num,
+        TOT_P=total_pages,
         DEPARTMENT="XX",
         TDP=str(emprtf.status.count("X")),
         TA=str(emprtf.status.count("A")),
@@ -318,15 +318,18 @@ def generate_all_employees_rtf(employees: dict, template_text: str) -> str:
     header, body = extract_rtf_header_footer(template_text)
     final_rtf = [header]
     emp_list = list(employees.values())
+    total_pages = len(emp_list)
+    page_num = 1
 
     for idx, emp in enumerate(emp_list):
         print(emp.paycode)
-        emp_rtf = generate_rtf(emp, body)
+        emp_rtf = generate_rtf(emp, body, page_num, total_pages)
         final_rtf.append(emp_rtf)
 
         # After every 2 employees, insert page break (except last)
         #if (idx + 1) % 2 == 0 and (idx + 1) < len(emp_list):
         final_rtf.append(r"\page\sect")
+        page_num += 1
 
     
     return "\n".join(final_rtf) + "}"
