@@ -1,6 +1,22 @@
 
 import calendar
 from datetime import datetime
+import numpy as np
+import pandas as pd
+from string import Template
+
+
+
+def hours_to_hhmm(hours):
+    if pd.isna(hours):
+        return ""
+
+    total_minutes = int(round(hours * 60))
+    hh = total_minutes // 60
+    mm = total_minutes % 60
+
+    return f"{hh:02d}:{mm:02d}"
+
 
 
 
@@ -198,6 +214,28 @@ def build_hrs_worked_header(
     return block
 
 
+def build_extra_hrs_worked_header(
+    shifts,
+    start_x=1560,
+    y=4532,
+    step=480
+):
+    """
+    Builds the extra hours row 
+    aligned exactly under the day header
+    """
+    block = ""
+
+    for shift in shifts:
+        block += rf"""
+{{\pard\pvpg\phpg\posx{start_x}\posy{y}\absw360\absh-221\qr\vertalt
+{{\f0\b0\i0\ul0\strike0\fs13\cf1 {shift}}}\par}}
+"""
+        start_x += step
+
+    return block
+
+
 
 
 
@@ -207,18 +245,25 @@ def generate_rtf(emprtf, tpl):
     #   tpl = Template(f.read())
 
 
+    tpl = Template(tpl)
+    #print("TOtal hours list",emprtf.hours_calc )
+    THW = np.nansum(emprtf.hours_calc)     #Calculation for TOtal hours worked in hh:mm
+    THW = hours_to_hhmm(THW)
+
 
     emprtf.in_times = ["'" if x != x else x for x in emprtf.in_times]
     emprtf.out_times = ["'" if x != x else x for x in emprtf.out_times]
     emprtf.hours_worked = ["'" if x != x else x for x in emprtf.hours_worked]
     emprtf.status = ['-' if x == "WO" else x for x in emprtf.status]
     emprtf.status = ['X' if x == "P" else x for x in emprtf.status]
+    emprtf.extra_hrs_worked = ["'" if x == 0 else x for x in emprtf.extra_hours_worked]
 
     shifts = generate_shift_list(emprtf.date)
     shifts_in = emprtf.in_times
     shifts_out = emprtf.out_times
     atd = emprtf.status
     hrs_worked = emprtf.hours_worked
+    extra_hrs_worked = emprtf.extra_hrs_worked
 
 
 
@@ -230,7 +275,7 @@ def generate_rtf(emprtf, tpl):
     shift_out_header = build_shift_out_header(shifts_out)
     atd_header = build_atd_header(atd)
     hrs_worked_header = build_hrs_worked_header(hrs_worked)
-
+    extra_hrs_worked_header = build_hrs_worked_header(extra_hrs_worked)
 
 
     filled_rtf = tpl.substitute(
@@ -239,18 +284,52 @@ def generate_rtf(emprtf, tpl):
         SHIFT_IN_HEADER=shift_in_header,
         SHIFT_OUT_HEADER=shift_out_header,
         HRS_WORKED_HEADER=hrs_worked_header,
+        EXTRA_HRS_WORKED_HEADER=extra_hrs_worked_header,
         ATD_HEADER=atd_header,
         EMPCODE=emprtf.paycode,
         NAME=emprtf.name,
         MONTH_YEAR=month_year_from_date(emprtf.date),
         P="1",
         TOT_P="1",
-        DEPARTMENT="ABC",
+        DEPARTMENT="XX",
         TDP=str(emprtf.status.count("X")),
         TA=str(emprtf.status.count("A")),
         TDW=str(emprtf.status.count("X")),
-        THW="TBD"
+        THW=str(THW)
     )
 
     return filled_rtf
+
+def extract_rtf_header_footer(rtf_text):
+    parts = rtf_text.template.split(r'\sectd')
+    header = parts[0]
+    body = '\sectd' + parts[1]
+    body = body[:-1]
+    return header, body
+
+
+def generate_all_employees_rtf(employees: dict, template_text: str) -> str:
+    """
+    employees: dict[paycode -> EmployeeRTF]
+    template_text: RTF template for ONE employee
+
+    Returns full RTF with 2 employees per page
+    """
+    header, body = extract_rtf_header_footer(template_text)
+    final_rtf = [header]
+    emp_list = list(employees.values())
+
+    for idx, emp in enumerate(emp_list):
+        print(emp.paycode)
+        emp_rtf = generate_rtf(emp, body)
+        final_rtf.append(emp_rtf)
+
+        # After every 2 employees, insert page break (except last)
+        #if (idx + 1) % 2 == 0 and (idx + 1) < len(emp_list):
+        final_rtf.append(r"\page\sect")
+
+    
+    return "\n".join(final_rtf) + "}"
+
+
 

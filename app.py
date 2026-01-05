@@ -4,7 +4,7 @@ import os, pypandoc
 from werkzeug.utils import secure_filename
 from string import Template
 from processing import process_excel, generate_emp_rtf_from_df   # keep your existing logic
-from rtf_process import generate_rtf
+from rtf_process import generate_rtf, generate_all_employees_rtf
 from io import BytesIO
 
 
@@ -189,6 +189,7 @@ def download_report_all():
         return redirect("/")
 
     EMPLOYEES = load_processed_employees()
+
     if EMPLOYEES is None:
         return "Attendance file not found", 404
 
@@ -196,13 +197,18 @@ def download_report_all():
         tpl = Template(f.read())
 
     # generate report for ALL employees
-    filled_rtf = generate_rtf_all(EMPLOYEES, tpl)
+    filled_rtf_all = generate_all_employees_rtf(EMPLOYEES, tpl)
 
-    output_file = "TimeCard_Report_All.rtf"
-    with open(output_file, "w", encoding="utf-8") as f:
-        f.write(filled_rtf)
+    buffer = BytesIO()
+    buffer.write(filled_rtf_all.encode("utf-8"))
+    buffer.seek(0)
 
-    return send_file(output_file, as_attachment=True)
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name=f"TimeCard_all.rtf",
+        mimetype="application/rtf"
+    )
 
 
 

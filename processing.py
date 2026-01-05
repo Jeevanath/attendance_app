@@ -10,11 +10,13 @@ from typing import List, Optional
 class EmployeeRTF:
     paycode: str
     name: str
+    date: str
     in_times: List[Optional[str]] = field(default_factory=list)
     out_times: List[Optional[str]] = field(default_factory=list)
     hours_worked: List[Optional[str]] = field(default_factory=list)
+    hours_calc: List[Optional[float]] = field(default_factory=list)
     status: List[Optional[str]] = field(default_factory=list)
-    date: List[Optional[str]] = field(default_factory=list)
+    extra_hours_worked: List[Optional[int]] = field(default_factory=list)
 
 
 
@@ -169,8 +171,10 @@ def process_excel(path):
 
     df['Hours_Worked_Modified'] = df['Hours_Calculated'].apply(hours_to_hhmm)
 
+    df['Extra_Hours_Worked_Modified'] = 0
 
-    df_modified = df[["Paycode", "Name", "Date", "Shift Start Time", "Shift End Time", "In Time", "Out Time", "Hours Worked", "Status", "In_Time_Modified", "Out_Time_Modified", "Hours_Worked_Modified"]]
+
+    df_modified = df[["Paycode", "Name", "Date", "Shift Start Time", "Shift End Time", "In Time", "Out Time", "Hours Worked", "Status", "In_Time_Modified", "Out_Time_Modified", "Hours_Calculated","Hours_Worked_Modified", "Extra_Hours_Worked_Modified"]]
 
     return df_modified
 
@@ -181,8 +185,9 @@ def process_excel(path):
 def generate_emp_rtf_from_df(df):
     employees = {}
 
-    print(df)
     for _, row in df.iterrows():
+        if pd.isna(row["Paycode"]):
+            continue
         paycode = row["Paycode"]
 
 
@@ -197,7 +202,8 @@ def generate_emp_rtf_from_df(df):
         employees[paycode].out_times.append(row["Out_Time_Modified"])
         employees[paycode].hours_worked.append(row["Hours_Worked_Modified"])
         employees[paycode].status.append(row["Status"])
-
+        employees[paycode].extra_hours_worked.append(row["Extra_Hours_Worked_Modified"])
+        employees[paycode].hours_calc.append(row["Hours_Calculated"])
 
 
 
