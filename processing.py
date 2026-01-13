@@ -17,6 +17,7 @@ class EmployeeRTF:
     hours_calc: List[Optional[float]] = field(default_factory=list)
     status: List[Optional[str]] = field(default_factory=list)
     extra_hours_worked: List[Optional[int]] = field(default_factory=list)
+    extra_hours_worked_formtd: List[Optional[int]] = field(default_factory=list)
 
 
 
@@ -168,13 +169,20 @@ def process_excel(path):
 
     df['In_Time_Modified'] = df['In_Time_Modified'].dt.strftime('%H:%M')
     df['Out_Time_Modified'] = df['Out_Time_Modified'].dt.strftime('%H:%M')
+    df.loc[df['Hours_Calculated'] < 6, 'Status'] = 'H'
 
+
+
+    df['Extra_Hours_Worked_Modified'] = (
+                                            df['Hours_Calculated'] - 8.5
+                                            ).where(df['Hours_Calculated'] > 8.5, 0)
     df['Hours_Worked_Modified'] = df['Hours_Calculated'].apply(hours_to_hhmm)
+    df['Extra_Hours_Worked_Modified_HH_MM'] = df['Extra_Hours_Worked_Modified'].apply(hours_to_hhmm)
 
-    df['Extra_Hours_Worked_Modified'] = 0
+    
 
 
-    df_modified = df[["Paycode", "Name", "Date", "Shift Start Time", "Shift End Time", "In Time", "Out Time", "Hours Worked", "Status", "In_Time_Modified", "Out_Time_Modified", "Hours_Calculated","Hours_Worked_Modified", "Extra_Hours_Worked_Modified"]]
+    df_modified = df[["Paycode", "Name", "Date", "Shift Start Time", "Shift End Time", "In Time", "Out Time", "Hours Worked", "Status", "In_Time_Modified", "Out_Time_Modified", "Hours_Calculated","Hours_Worked_Modified", "Extra_Hours_Worked_Modified", "Extra_Hours_Worked_Modified_HH_MM"]]
 
     return df_modified
 
@@ -203,6 +211,7 @@ def generate_emp_rtf_from_df(df):
         employees[paycode].hours_worked.append(row["Hours_Worked_Modified"])
         employees[paycode].status.append(row["Status"])
         employees[paycode].extra_hours_worked.append(row["Extra_Hours_Worked_Modified"])
+        employees[paycode].extra_hours_worked_formtd.append(row["Extra_Hours_Worked_Modified_HH_MM"])
         employees[paycode].hours_calc.append(row["Hours_Calculated"])
 
 

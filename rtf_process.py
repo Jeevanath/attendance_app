@@ -240,7 +240,7 @@ def build_extra_hrs_worked_header(
 
 
 
-def generate_rtf(emprtf, tpl, page_num =1, total_pages=1):
+def generate_rtf(emprtf, tpl, page_num = 1, total_pages=1):
     #with open(REPORT_TEMPLATE, "r", encoding="utf-8") as f:
     #   tpl = Template(f.read())
 
@@ -250,20 +250,25 @@ def generate_rtf(emprtf, tpl, page_num =1, total_pages=1):
     THW = np.nansum(emprtf.hours_calc)     #Calculation for TOtal hours worked in hh:mm
     THW = hours_to_hhmm(THW)
 
+    TEHW = np.nansum(emprtf.extra_hours_worked)     #Calculation for Extra hours worked in hh:mm
+    TEHW = hours_to_hhmm(TEHW)
+
 
     emprtf.in_times = ["'" if x != x else x for x in emprtf.in_times]
     emprtf.out_times = ["'" if x != x else x for x in emprtf.out_times]
     emprtf.hours_worked = ["'" if x != x else x for x in emprtf.hours_worked]
     emprtf.status = ['-' if x == "WO" else x for x in emprtf.status]
     emprtf.status = ['X' if x == "P" else x for x in emprtf.status]
-    emprtf.extra_hrs_worked = ["'" if x == 0 else x for x in emprtf.extra_hours_worked]
+    emprtf.status = ['/' if x == "H" else x for x in emprtf.status]
+    emprtf.status = ['OD' if x == "POW" else x for x in emprtf.status]
+    emprtf.extra_hours_worked_formtd = ["'" if x == "00:00" else x for x in emprtf.extra_hours_worked_formtd]
 
     shifts = generate_shift_list(emprtf.date)
     shifts_in = emprtf.in_times
     shifts_out = emprtf.out_times
     atd = emprtf.status
     hrs_worked = emprtf.hours_worked
-    extra_hrs_worked = emprtf.extra_hrs_worked
+    extra_hrs_worked = emprtf.extra_hours_worked_formtd
 
 
 
@@ -275,7 +280,7 @@ def generate_rtf(emprtf, tpl, page_num =1, total_pages=1):
     shift_out_header = build_shift_out_header(shifts_out)
     atd_header = build_atd_header(atd)
     hrs_worked_header = build_hrs_worked_header(hrs_worked)
-    extra_hrs_worked_header = build_hrs_worked_header(extra_hrs_worked)
+    extra_hrs_worked_header = build_extra_hrs_worked_header(extra_hrs_worked)
 
 
     filled_rtf = tpl.substitute(
@@ -292,10 +297,18 @@ def generate_rtf(emprtf, tpl, page_num =1, total_pages=1):
         P=page_num,
         TOT_P=total_pages,
         DEPARTMENT="XX",
-        TDP=str(emprtf.status.count("X")),
+        TDP=str(emprtf.status.count("X") + emprtf.status.count("MIS") + emprtf.status.count("/")+ emprtf.status.count("OD")),
         TA=str(emprtf.status.count("A")),
-        TDW=str(emprtf.status.count("X")),
-        THW=str(THW)
+        TDW=str(emprtf.status.count("X") + emprtf.status.count("MIS") + emprtf.status.count("/") + emprtf.status.count("OD")),
+        THW=str(THW),
+        TEHW=str(TEHW),
+        TWO=0,
+        TCL=0,
+        TCO=0,
+        TOD=str(emprtf.status.count("OD")),
+        TEL=0,
+        TLO=0,
+        ML=0
     )
 
     return filled_rtf
