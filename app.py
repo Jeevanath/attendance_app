@@ -3,7 +3,7 @@ import pandas as pd
 import os, pypandoc
 from werkzeug.utils import secure_filename
 from string import Template
-from processing import process_excel, generate_emp_rtf_from_df   # keep your existing logic
+from processing import process_excel,process_excel_vallam, generate_emp_rtf_from_df   # keep your existing logic
 from rtf_process import generate_rtf, generate_all_employees_rtf
 from io import BytesIO
 
@@ -132,7 +132,7 @@ def customised():
     if not os.path.exists(ATTENDANCE_FILE):
         return "Attendance file not found", 404
 
-    df = process_excel(ATTENDANCE_FILE)
+    df = process_excel_vallam(ATTENDANCE_FILE)
     #processed_dfs["current"] = df
 
     df.to_excel(PROCESSED_FILE, index=False, engine="openpyxl")
@@ -162,7 +162,7 @@ def download_report():
         return redirect("/")
 
     if not os.path.exists(PROCESSED_FILE):
-        return "Attendance file not found", 404
+        return "Processed file not found", 404
 
     p_df = pd.read_excel(PROCESSED_FILE)
 
@@ -191,7 +191,7 @@ def download_report_all():
     EMPLOYEES = load_processed_employees()
 
     if EMPLOYEES is None:
-        return "Attendance file not found", 404
+        return "Processed file not found", 404
 
     with open(REPORT_TEMPLATE, "r", encoding="utf-8") as f:
         tpl = Template(f.read())

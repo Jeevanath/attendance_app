@@ -20,13 +20,13 @@ def hours_to_hhmm(hours):
 
 
 
-def generate_shift_list(date_str, default_shift="G"):
-    """
+"""def generate_shift_list(date_str, default_shift="G"):
+
     date_str format: DD/MM/YYYY
     returns list like ['G', '', 'G', 'G', ...]
     Sundays -> ''
-    """
-    dt = datetime.strptime(date_str, "%d/%m/%Y")
+
+    dt = datetime.strptime(date_str, "%d-%b-%Y")
     year, month = dt.year, dt.month
 
     days_in_month = calendar.monthrange(year, month)[1]
@@ -41,7 +41,7 @@ def generate_shift_list(date_str, default_shift="G"):
         else:
             shifts.append(default_shift)
 
-    return shifts
+    return shifts """
 
 
 
@@ -71,7 +71,9 @@ def build_day_header2(date_str, start_x=1560, y=2471, step=480):
     Generates the day-number row (01–28/29/30/31)
     date_str format: DD/MM/YYYY
     """
-    dt = datetime.strptime(date_str, "%d/%m/%Y")
+
+    print("Date :",date_str)
+    dt = datetime.strptime(date_str, "%d-%b-%Y")
     days = calendar.monthrange(dt.year, dt.month)[1]
 
     block = ""
@@ -94,7 +96,7 @@ def month_year_from_date(date_str: str) -> str:
     date_str format: DD/MM/YYYY
     returns: 'MONTH YYYY'
     """
-    dt = datetime.strptime(date_str, "%d/%m/%Y")
+    dt = datetime.strptime(date_str, "%d-%b-%Y")
     return dt.strftime("%B %Y").upper()
 
 
@@ -263,7 +265,7 @@ def generate_rtf(emprtf, tpl, page_num = 1, total_pages=1):
     emprtf.status = ['OD' if x == "POW" else x for x in emprtf.status]
     emprtf.extra_hours_worked_formtd = ["'" if x == "00:00" else x for x in emprtf.extra_hours_worked_formtd]
 
-    shifts = generate_shift_list(emprtf.date)
+    shifts = emprtf.shifts
     shifts_in = emprtf.in_times
     shifts_out = emprtf.out_times
     atd = emprtf.status
@@ -291,12 +293,12 @@ def generate_rtf(emprtf, tpl, page_num = 1, total_pages=1):
         HRS_WORKED_HEADER=hrs_worked_header,
         EXTRA_HRS_WORKED_HEADER=extra_hrs_worked_header,
         ATD_HEADER=atd_header,
-        EMPCODE=emprtf.paycode,
+        EMPCODE=emprtf.emp_code,
         NAME=emprtf.name,
         MONTH_YEAR=month_year_from_date(emprtf.date),
         P=page_num,
         TOT_P=total_pages,
-        DEPARTMENT="XX",
+        DEPARTMENT=emprtf.department,
         TDP=str(emprtf.status.count("X") + emprtf.status.count("MIS") + emprtf.status.count("/")+ emprtf.status.count("OD")),
         TA=str(emprtf.status.count("A")),
         TDW=str(emprtf.status.count("X") + emprtf.status.count("MIS") + emprtf.status.count("/") + emprtf.status.count("OD")),
@@ -323,26 +325,26 @@ def extract_rtf_header_footer(rtf_text):
 
 def generate_all_employees_rtf(employees: dict, template_text: str) -> str:
     """
-    employees: dict[paycode -> EmployeeRTF]
+    employees: dict[emp_code -> EmployeeRTF]
     template_text: RTF template for ONE employee
 
     Returns full RTF with 2 employees per page
     """
     header, body = extract_rtf_header_footer(template_text)
     final_rtf = [header]
-    emp_list = list(employees.values())
+    emp_list = employees.values()
     total_pages = len(emp_list)
     page_num = 1
 
-    for idx, emp in enumerate(emp_list):
-        print(emp.paycode)
-        emp_rtf = generate_rtf(emp, body, page_num, total_pages)
-        final_rtf.append(emp_rtf)
+    for rtf_list in employees.values():
+        for rtf in rtf_list:
+            emp_rtf = generate_rtf(rtf, body, page_num, total_pages)
+            final_rtf.append(emp_rtf)
 
         # After every 2 employees, insert page break (except last)
         #if (idx + 1) % 2 == 0 and (idx + 1) < len(emp_list):
-        final_rtf.append(r"\page\sect")
-        page_num += 1
+            final_rtf.append(r"\page\sect")
+            page_num += 1
 
     
     return "\n".join(final_rtf) + "}"
